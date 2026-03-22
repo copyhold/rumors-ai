@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smil xmlns="http://www.w3.org/2001/SMIL20/Language" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <body>
+    <seq>
+      <par id="line_0001">
+        <text src="play_player.html#line_0001" />
+        <audio src="play_audio.mp3" clipBegin="0.000s" clipEnd="1.600s" />
+      </par>
+      <par id="line_0002">
+        <text src="play_player.html#line_0002" />
+        <audio src="play_audio.mp3" clipBegin="2.000s" clipEnd="3.600s" />
+      </par>
+      <par id="line_0003">
+        <text src="play_player.html#line_0003" />
+        <audio src="play_audio.mp3" clipBegin="4.000s" clipEnd="6.160s" />
+      </par>
+      <par id="line_0004">
+        <text src="play_player.html#line_0004" />
+        <audio src="play_audio.mp3" clipBegin="6.560s" clipEnd="10.240s" />
+      </par>
+      <par id="line_0005">
+        <text src="play_player.html#line_0005" />
+        <audio src="play_audio.mp3" clipBegin="10.640s" clipEnd="15.680s" />
+      </par>
+      <par id="line_0006">
+        <text src="play_player.html#line_0006" />
+        <audio src="play_audio.mp3" clipBegin="16.080s" clipEnd="17.360s" />
+      </par>
+      <par id="line_0007">
+        <text src="play_player.html#line_0007" />
+        <audio src="play_audio.mp3" clipBegin="17.760s" clipEnd="21.200s" />
+      </par>
+      <par id="line_0008">
+        <text src="play_player.html#line_0008" />
+        <audio src="play_audio.mp3" clipBegin="21.600s" clipEnd="23.440s" />
+      </par>
+      <par id="line_0009">
+        <text src="play_player.html#line_0009" />
+        <audio src="play_audio.mp3" clipBegin="23.589s" clipEnd="27.829s" />
+      </par>
+      <par id="line_0010">
+        <text src="play_player.html#line_0010" />
+        <audio src="play_audio.mp3" clipBegin="27.979s" clipEnd="33.019s" />
+      </par>
+      <par id="line_0011">
+        <text src="play_player.html#line_0011" />
+        <audio src="play_audio.mp3" clipBegin="33.419s" clipEnd="34.059s" />
+      </par>
+      <par id="line_0012">
+        <text src="play_player.html#line_0012" />
+        <audio src="play_audio.mp3" clipBegin="34.459s" clipEnd="39.739s" />
+      </par>
+      <par id="line_0013">
+        <text src="play_player.html#line_0013" />
+        <audio src="play_audio.mp3" clipBegin="39.889s" clipEnd="41.889s" />
+      </par>
+      <par id="line_0014">
+        <text src="play_player.html#line_0014" />
+        <audio src="play_audio.mp3" clipBegin="42.289s" clipEnd="43.169s" />
+      </par>
+    </seq>
+  </body>
+</smil>

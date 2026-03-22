@@ -1,2 +1,6 @@
+.env
 venv
 pages
+page2
+voices.json
+*.txt

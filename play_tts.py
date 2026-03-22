@@ -24,7 +24,6 @@ from xml.etree import ElementTree as ET
 
 try:
     from elevenlabs import ElevenLabs
-    from elevenlabs.types import VoiceSettings
 except ImportError:
     sys.exit("Missing dependency: pip install elevenlabs")
 
@@ -36,7 +35,7 @@ except ImportError:
 
 # ── Constants ───────────────────────────────────────────────────────────────
 
-MODEL_ID = "eleven_multilingual_v2"
+MODEL_ID = "eleven_v3"
 SILENCE_BETWEEN_SPEAKERS_MS = 400
 SILENCE_BETWEEN_LINES_MS = 150
 VOICES_FILE = "voices.json"
@@ -48,18 +47,6 @@ HTML_FILE = "play_player.html"
 CHARACTER_COLORS = [
     "#c0392b", "#2980b9", "#27ae60", "#8e44ad",
     "#e67e22", "#16a085", "#d35400", "#2c3e50",
-]
-
-# Default voice settings variations to differentiate characters
-VOICE_PRESETS = [
-    {"stability": 0.55, "similarity_boost": 0.80, "style": 0.20, "speed": 1.00},
-    {"stability": 0.35, "similarity_boost": 0.75, "style": 0.40, "speed": 0.95},
-    {"stability": 0.70, "similarity_boost": 0.90, "style": 0.10, "speed": 1.05},
-    {"stability": 0.45, "similarity_boost": 0.65, "style": 0.50, "speed": 0.90},
-    {"stability": 0.60, "similarity_boost": 0.85, "style": 0.30, "speed": 1.10},
-    {"stability": 0.30, "similarity_boost": 0.70, "style": 0.55, "speed": 0.85},
-    {"stability": 0.75, "similarity_boost": 0.95, "style": 0.05, "speed": 1.15},
-    {"stability": 0.50, "similarity_boost": 0.60, "style": 0.45, "speed": 1.00},
 ]
 
 
@@ -146,8 +133,6 @@ def generate_voices_config(client: ElevenLabs, characters: list[str]) -> dict:
     config = {
         "_instructions": (
             "Assign a voice_id to each character. "
-            "Adjust stability (0.0-1.0), similarity_boost (0.0-1.0), "
-            "style (0.0-1.0), and speed (0.7-1.3) to differentiate voices. "
             "Available voices are listed in _available_voices."
         ),
         "_available_voices": all_voices,
@@ -157,11 +142,9 @@ def generate_voices_config(client: ElevenLabs, characters: list[str]) -> dict:
     # Auto-assign voices cycling through available ones
     for i, character in enumerate(characters):
         voice = all_voices[i % len(all_voices)]
-        preset = VOICE_PRESETS[i % len(VOICE_PRESETS)]
         config["characters"][character] = {
             "voice_id": voice["voice_id"],
             "voice_name": voice["name"],
-            **preset,
         }
 
     return config
@@ -169,17 +152,10 @@ def generate_voices_config(client: ElevenLabs, characters: list[str]) -> dict:
 
 def tts_segment(client: ElevenLabs, text: str, char_config: dict) -> bytes:
     """Call ElevenLabs TTS and return MP3 bytes."""
-    settings = VoiceSettings(
-        stability=char_config.get("stability", 0.55),
-        similarity_boost=char_config.get("similarity_boost", 0.80),
-        style=char_config.get("style", 0.20),
-        speed=char_config.get("speed", 1.00),
-    )
     audio_iter = client.text_to_speech.convert(
         voice_id=char_config["voice_id"],
         text=text,
         model_id=MODEL_ID,
-        voice_settings=settings,
     )
     return b"".join(audio_iter)
 
@@ -545,13 +521,8 @@ def main():
         config = generate_voices_config(client, characters)
         voices_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"\n✓ Created {VOICES_FILE}")
-        print("  → Open it, assign voice IDs and adjust settings for each character.")
+        print("  → Open it and assign a voice_id to each character from _available_voices.")
         print(f"  → Then re-run: python {sys.argv[0]} {sys.argv[1]}")
-        print("\nQuick reference — voice parameters:")
-        print("  stability:       0.3 (expressive) – 0.8 (consistent)")
-        print("  similarity_boost:0.5 (varied) – 0.95 (close to original)")
-        print("  style:           0.0 (neutral) – 0.6 (dramatic)")
-        print("  speed:           0.8 (slow) – 1.2 (fast)")
         return
 
     # ── Second run: generate audio ──────────────────────────────────────────
@@ -572,18 +543,18 @@ def main():
     print(f"\nTotal audio duration: {total_duration_s:.1f}s ({total_duration_s/60:.1f} min)")
 
     print(f"Exporting {AUDIO_FILE}...")
-    full_audio.export(AUDIO_FILE, format="mp3", bitrate="128k")
+    full_audio.export(f"distr/{AUDIO_FILE}", format="mp3", bitrate="128k")
 
     print(f"Writing {SMIL_FILE}...")
     smil_xml = generate_smil(timed_segments)
-    Path(SMIL_FILE).write_text(
+    Path(f"distr/{SMIL_FILE}").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n' + smil_xml,
         encoding="utf-8"
     )
 
     print(f"Writing {HTML_FILE}...")
     html = generate_html(timed_segments, characters)
-    Path(HTML_FILE).write_text(html, encoding="utf-8")
+    Path(f"distr/{HTML_FILE}").write_text(html, encoding="utf-8")
 
     print(f"\n✓ Done!")
     print(f"  {AUDIO_FILE}       — full play audio")

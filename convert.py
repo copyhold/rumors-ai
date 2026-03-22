@@ -21,11 +21,15 @@ def process_screenplay_folder(folder_path, output_filename="screenplay_output.ht
 
     prompt = """
     Identify the character names and the dialogue/actions in this screenplay image.
-    Format the output as HTML table rows (<tr>...</tr>).
-    - First column (<td>): Character Name (or 'Action' if it is a stage direction).
-    - Second column (<td>): Dialogue or description text.
+
+    Format the output as plain text in the following format:
+    [Character Name]
+    Dialogue or description text
+    [another Character Name]
+    Dialogue or description text
+
+    - do not add page numbers into the output.
     - Important: Do NOT translate. Keep the Hebrew text exactly as it is.
-    - Return ONLY the raw <tr> HTML tags. No markdown code blocks.
     """
 
     for filename in image_files:
@@ -91,4 +95,4 @@ def process_screenplay_folder(folder_path, output_filename="screenplay_output.ht
     print(f"\nSuccess! File created: {output_filename}")
 
 # Usage:
-process_screenplay_folder("./pages")
+process_screenplay_folder("./page2")

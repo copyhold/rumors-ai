@@ -243,250 +243,38 @@ def generate_smil(timed_segments: list[dict]) -> str:
 
 # ── HTML player generation ──────────────────────────────────────────────────
 
+TEMPLATE_FILE = "player_template.html"
+
+
 def generate_html(timed_segments: list[dict], characters: list[str]) -> str:
     char_color = {char: CHARACTER_COLORS[i % len(CHARACTER_COLORS)]
                   for i, char in enumerate(characters)}
 
-    lines_html = []
-    for seg in timed_segments:
-        color = char_color.get(seg["character"], "#333")
-        char_display = seg["character"]
-        text = seg["raw_text"]  # Show original text (with stage directions) for readability
-        start = seg["start_ms"] / 1000
-        end = seg["end_ms"] / 1000
-        lines_html.append(
-            f'<div class="line" id="{seg["line_id"]}" '
-            f'data-start="{start:.3f}" data-end="{end:.3f}" '
-            f'onclick="seekTo({start:.3f})">'
-            f'<span class="char" style="color:{color}">{char_display}</span>'
-            f'<span class="text">{text}</span>'
-            f'</div>'
-        )
-
+    lines_html = "".join(
+        f'<div class="line" id="{seg["line_id"]}" '
+        f'data-start="{seg["start_ms"] / 1000:.3f}" data-end="{seg["end_ms"] / 1000:.3f}" '
+        f'data-char="{seg["character"]}" '
+        f'onclick="seekTo({seg["start_ms"] / 1000:.3f})">'
+        f'<span class="char" style="color:{char_color.get(seg["character"], "#333")}">{seg["character"]}</span>'
+        f'<span class="text">{seg["raw_text"]}</span>'
+        f'</div>'
+        for seg in timed_segments
+    )
     legend_items = "".join(
         f'<span class="legend-item" style="border-color:{char_color[c]};color:{char_color[c]}">{c}</span>'
         for c in characters
     )
+    reduce_items = "".join(
+        f'<button class="reduce-btn" data-char="{c}" style="border-color:{char_color[c]};color:{char_color[c]}">{c}</button>'
+        for c in characters
+    )
 
-    return f"""<!DOCTYPE html>
-<html dir="rtl" lang="he">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>מחזה — נגן</title>
-<style>
-  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{
-    font-family: Arial, sans-serif;
-    background: #1a1a2e;
-    color: #e0e0e0;
-    direction: rtl;
-  }}
-  #player-bar {{
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: #16213e;
-    padding: 12px 20px;
-    border-bottom: 1px solid #0f3460;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }}
-  audio {{
-    width: 100%;
-    height: 40px;
-    direction: ltr;
-  }}
-  #search-row {{
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-  }}
-  #search-box {{
-    flex: 1;
-    min-width: 200px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #0f3460;
-    background: #0f3460;
-    color: #fff;
-    font-size: 15px;
-    direction: rtl;
-  }}
-  #search-box::placeholder {{ color: #888; }}
-  #search-info {{
-    font-size: 13px;
-    color: #aaa;
-    white-space: nowrap;
-  }}
-  #legend {{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }}
-  .legend-item {{
-    font-size: 12px;
-    padding: 2px 8px;
-    border: 1.5px solid;
-    border-radius: 12px;
-    cursor: pointer;
-  }}
-  #transcript {{
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 20px;
-  }}
-  .line {{
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-    line-height: 1.6;
-  }}
-  .line:hover {{ background: #16213e; }}
-  .line.active {{ background: #0f3460; border-right: 3px solid #e94560; }}
-  .line.highlight {{ background: #2a2a00; }}
-  .char {{
-    min-width: 110px;
-    max-width: 110px;
-    font-weight: bold;
-    font-size: 14px;
-    text-align: right;
-    flex-shrink: 0;
-  }}
-  .text {{
-    flex: 1;
-    font-size: 16px;
-  }}
-  mark {{
-    background: #f0c040;
-    color: #000;
-    border-radius: 2px;
-    padding: 0 1px;
-  }}
-</style>
-</head>
-<body>
-
-<div id="player-bar">
-  <audio id="audio" controls src="{AUDIO_FILE}"></audio>
-  <div id="search-row">
-    <input id="search-box" type="text" placeholder="חיפוש בטקסט..." autocomplete="off">
-    <span id="search-info"></span>
-  </div>
-  <div id="legend">{legend_items}</div>
-</div>
-
-<div id="transcript">
-{''.join(lines_html)}
-</div>
-
-<script>
-const audio = document.getElementById('audio');
-const searchBox = document.getElementById('search-box');
-const searchInfo = document.getElementById('search-info');
-const lines = Array.from(document.querySelectorAll('.line'));
-let searchResults = [];
-let searchIdx = 0;
-
-function seekTo(t) {{
-  audio.currentTime = t;
-  audio.play();
-}}
-
-// Highlight active line during playback
-audio.addEventListener('timeupdate', () => {{
-  const t = audio.currentTime;
-  lines.forEach(el => {{
-    const start = parseFloat(el.dataset.start);
-    const end = parseFloat(el.dataset.end);
-    if (t >= start && t < end) {{
-      el.classList.add('active');
-      if (!isInViewport(el)) {{
-        el.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-      }}
-    }} else {{
-      el.classList.remove('active');
-    }}
-  }});
-}});
-
-function isInViewport(el) {{
-  const r = el.getBoundingClientRect();
-  return r.top >= 80 && r.bottom <= window.innerHeight;
-}}
-
-// Search
-searchBox.addEventListener('input', () => {{
-  clearHighlights();
-  const q = searchBox.value.trim();
-  if (!q) {{ searchInfo.textContent = ''; return; }}
-
-  searchResults = [];
-  const re = new RegExp(q.replace(/[.*+?^${{}}()|[\]\\\\]/g, '\\\\$&'), 'gi');
-
-  lines.forEach(el => {{
-    const textSpan = el.querySelector('.text');
-    const orig = textSpan.textContent;
-    if (re.test(orig)) {{
-      textSpan.innerHTML = orig.replace(re, m => `<mark>${{m}}</mark>`);
-      searchResults.push(el);
-    }}
-    re.lastIndex = 0;
-  }});
-
-  if (searchResults.length > 0) {{
-    searchIdx = 0;
-    scrollToResult();
-    searchInfo.textContent = `${{searchIdx + 1}} / ${{searchResults.length}}`;
-  }} else {{
-    searchInfo.textContent = 'לא נמצא';
-  }}
-}});
-
-searchBox.addEventListener('keydown', e => {{
-  if (searchResults.length === 0) return;
-  if (e.key === 'Enter') {{
-    if (e.shiftKey) {{
-      searchIdx = (searchIdx - 1 + searchResults.length) % searchResults.length;
-    }} else {{
-      searchIdx = (searchIdx + 1) % searchResults.length;
-    }}
-    scrollToResult();
-    searchInfo.textContent = `${{searchIdx + 1}} / ${{searchResults.length}}`;
-  }}
-}});
-
-function scrollToResult() {{
-  searchResults[searchIdx].scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-  searchResults[searchIdx].classList.add('highlight');
-  setTimeout(() => searchResults[searchIdx] && searchResults[searchIdx].classList.remove('highlight'), 1200);
-}}
-
-function clearHighlights() {{
-  lines.forEach(el => {{
-    const textSpan = el.querySelector('.text');
-    textSpan.innerHTML = textSpan.textContent;
-  }});
-}}
-
-// Legend click → filter/jump to first line of that character
-document.querySelectorAll('.legend-item').forEach(item => {{
-  item.addEventListener('click', () => {{
-    const char = item.textContent;
-    const first = lines.find(l => l.querySelector('.char').textContent === char);
-    if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-  }});
-}});
-</script>
-</body>
-</html>
-"""
+    template = Path(TEMPLATE_FILE).read_text(encoding="utf-8")
+    return (template
+            .replace("__AUDIO_SRC__", AUDIO_FILE)
+            .replace("__LEGEND_ITEMS__", legend_items)
+            .replace("__REDUCE_ITEMS__", reduce_items)
+            .replace("__TRANSCRIPT__", lines_html))
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────

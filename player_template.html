@@ -200,7 +200,7 @@
 <body>
 
 <div id="player-bar">
-  <audio id="audio" src="play_audio.mp3"></audio>
+  <audio id="audio" src="__AUDIO_SRC__"></audio>
   <div id="controls-row">
     <button id="play-btn">▶</button>
     <span id="time-display">0:00 / 0:00</span>
@@ -210,10 +210,10 @@
     <input id="search-box" type="text" placeholder="חיפוש בטקסט..." autocomplete="off">
     <span id="search-info"></span>
   </div>
-  <div id="legend"><span class="legend-item" style="border-color:#c0392b;color:#c0392b">קו</span><span class="legend-item" style="border-color:#2980b9;color:#2980b9">כריס</span></div>
+  <div id="legend">__LEGEND_ITEMS__</div>
   <div id="reduce-row">
     <span id="reduce-label">הנמך עוצמה:</span>
-    <button class="reduce-btn" data-char="קו" style="border-color:#c0392b;color:#c0392b">קו</button><button class="reduce-btn" data-char="כריס" style="border-color:#2980b9;color:#2980b9">כריס</button>
+    __REDUCE_ITEMS__
   </div>
   <div id="speed-row">
     <span id="speed-label">מהירות:</span>
@@ -224,7 +224,7 @@
 </div>
 
 <div id="transcript">
-<div class="line" id="line_0001" data-char="קו" data-start="0.000" data-end="1.600" onclick="seekTo(0.000)"><span class="char" style="color:#c0392b">קו</span><span class="text">הוא צלצל? (כריס נבהלת ומחזירה את הסיגריה)</span></div><div class="line" id="line_0002" data-char="כריס" data-start="2.000" data-end="3.600" onclick="seekTo(2.000)"><span class="char" style="color:#2980b9">כריס</span><span class="text">הייתי צועקת לך, לא?</span></div><div class="line" id="line_0003" data-char="קו" data-start="4.000" data-end="6.160" onclick="seekTo(4.000)"><span class="char" style="color:#c0392b">קו</span><span class="text">תתקשרי שוב.</span></div><div class="line" id="line_0004" data-char="כריס" data-start="6.560" data-end="10.240" onclick="seekTo(6.560)"><span class="char" style="color:#2980b9">כריס</span><span class="text">התקשרתי פעמיים. הם מחפשים אותו... ומה איתו?</span></div><div class="line" id="line_0005" data-char="קו" data-start="10.640" data-end="15.680" onclick="seekTo(10.640)"><span class="char" style="color:#c0392b">קו</span><span class="text">הוא מדמם בטירוף... אם הוא לא מצלצל תוך שתי דקות, תזמיני אמבולנס.</span></div><div class="line" id="line_0006" data-char="כריס" data-start="16.080" data-end="17.360" onclick="seekTo(16.080)"><span class="char" style="color:#2980b9">כריס</span><span class="text">אני חייבת סיגריה.</span></div><div class="line" id="line_0007" data-char="קו" data-start="17.760" data-end="21.200" onclick="seekTo(17.760)"><span class="char" style="color:#c0392b">קו</span><span class="text">אחרי שנה וחצי? ממש לא! תתאפקי.</span></div><div class="line" id="line_0008" data-char="כריס" data-start="21.600" data-end="23.440" onclick="seekTo(21.600)"><span class="char" style="color:#2980b9">כריס</span><span class="text">אני לא מאמינה שזה קורה לי (היא ניגשת לקופסת הסיגריות. הטלפון מצלצל).</span></div><div class="line" id="line_0009" data-char="כריס" data-start="23.589" data-end="27.829" onclick="seekTo(23.589)"><span class="char" style="color:#2980b9">כריס</span><span class="text">קני, הטלפון. (אבל הוא כבר לא שם. היא מרימה את השפופרת) הלו? ד"ר</span></div><div class="line" id="line_0010" data-char="כריס" data-start="27.979" data-end="33.019" onclick="seekTo(27.979)"><span class="char" style="color:#2980b9">כריס</span><span class="text">דידלי?...אה, סליחה, ד"ר דאדלי, אני כל כך שמחה שזה אתה.</span></div><div class="line" id="line_0011" data-char="קו" data-start="33.419" data-end="34.059" onclick="seekTo(33.419)"><span class="char" style="color:#c0392b">קו</span><span class="text">זה הרופא?</span></div><div class="line" id="line_0012" data-char="כריס" data-start="34.459" data-end="39.739" onclick="seekTo(34.459)"><span class="char" style="color:#2980b9">כריס</span><span class="text">(בטלפון) לא הייתי מפריעה לך אבל זה מצב חירום. מדברת כריס גורמן. בעלי ואני</span></div><div class="line" id="line_0013" data-char="כריס" data-start="39.889" data-end="41.889" onclick="seekTo(39.889)"><span class="char" style="color:#2980b9">כריס</span><span class="text">חברים טובים של צ'רלי ברוק.</span></div><div class="line" id="line_0014" data-char="קו" data-start="42.289" data-end="43.169" onclick="seekTo(42.289)"><span class="char" style="color:#c0392b">קו</span><span class="text">זה הרופא?</span></div>
+__TRANSCRIPT__
 </div>
 
 <script>

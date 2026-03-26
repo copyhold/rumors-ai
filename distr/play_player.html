@@ -278,19 +278,26 @@ audio.addEventListener('loadedmetadata', () => {
 
 // Seek bar
 let seeking = false;
-seekBar.addEventListener('mousedown', () => { seeking = true; });
 seekBar.addEventListener('input', () => {
+  seeking = true;
   timeDisplay.textContent = `${fmt(seekBar.value)} / ${fmt(audio.duration || 0)}`;
 });
 seekBar.addEventListener('change', () => {
   audio.currentTime = parseFloat(seekBar.value);
+  // keep seeking=true until the audio engine confirms the seek
+});
+audio.addEventListener('seeked', () => {
   seeking = false;
 });
 
 function seekTo(t) {
-  ensureAudioContext();
+  // Don't call ensureAudioContext() here — createMediaElementSource() on first
+  // call can reset currentTime in some browsers. Resume only if already created.
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   audio.currentTime = t;
-  audio.play();
+  seekBar.value = t;
+  timeDisplay.textContent = `${fmt(t)} / ${fmt(audio.duration || 0)}`;
+  audio.play().catch(() => {});
 }
 
 // Highlight active line + update seek bar + per-character gain

@@ -54,19 +54,18 @@
   #legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 1px;
   }
   .legend-item {
-    font-size: 12px;
+    font-size: 15px;
     padding: 2px 8px;
-    border: 1.5px solid;
-    border-radius: 12px;
+    border: 1px solid;
     cursor: pointer;
   }
   #reduce-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 1px;
     align-items: center;
   }
   #reduce-label {
@@ -75,10 +74,9 @@
     white-space: nowrap;
   }
   .reduce-btn {
-    font-size: 12px;
+    font-size: 15px;
     padding: 2px 8px;
     border: 1.5px solid;
-    border-radius: 12px;
     cursor: pointer;
     background: transparent;
     transition: opacity 0.2s;
@@ -153,6 +151,11 @@
     color: #000;
     border-radius: 2px;
     padding: 0 1px;
+  }
+  @media (max-width: 420px) {
+    .char {
+      min-width: unset;
+    }
   }
 </style>
 </head>

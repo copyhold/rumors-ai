@@ -23,51 +23,10 @@
     flex-direction: column;
     gap: 10px;
   }
-  audio { display: none; }
-  #controls-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    direction: ltr;
-  }
-  #play-btn {
-    width: 36px;
+  audio {
+    width: 100%;
     height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: #e94560;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #play-btn:hover { background: #c73652; }
-  #time-display {
-    font-size: 12px;
-    color: #aaa;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  #seek-bar {
-    flex: 1;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: #0f3460;
-    border-radius: 2px;
-    cursor: pointer;
-    outline: none;
-  }
-  #seek-bar::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #e94560;
-    cursor: pointer;
+    direction: ltr;
   }
   #search-row {
     display: flex;
@@ -200,12 +159,7 @@
 <body>
 
 <div id="player-bar">
-  <audio id="audio" src="https://media.githubusercontent.com/media/copyhold/rumors-ai/refs/heads/main/distr/play_audio.mp3"></audio>
-  <div id="controls-row">
-    <button id="play-btn">▶</button>
-    <span id="time-display">0:00 / 0:00</span>
-    <input id="seek-bar" type="range" min="0" step="0.1" value="0">
-  </div>
+  <audio id="audio" src="__AUDIO_SRC__" controls></audio>
   <div id="search-row">
     <input id="search-box" type="text" placeholder="חיפוש בטקסט..." autocomplete="off">
     <span id="search-info"></span>
@@ -229,9 +183,6 @@ __TRANSCRIPT__
 
 <script>
 const audio = document.getElementById('audio');
-const playBtn = document.getElementById('play-btn');
-const seekBar = document.getElementById('seek-bar');
-const timeDisplay = document.getElementById('time-display');
 const searchBox = document.getElementById('search-box');
 const searchInfo = document.getElementById('search-info');
 const speedDisplay = document.getElementById('speed-display');
@@ -239,74 +190,17 @@ const lines = Array.from(document.querySelectorAll('.line'));
 let searchResults = [];
 let searchIdx = 0;
 
-// Web Audio API for per-character volume reduction
-let audioCtx = null;
-let gainNode = null;
 const reducedChars = new Set();
-const REDUCED_GAIN = 0.15;
-
-function ensureAudioContext() {
-  if (audioCtx) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return;
-  }
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const source = audioCtx.createMediaElementSource(audio);
-  gainNode = audioCtx.createGain();
-  source.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-}
-
-// Play/pause
-playBtn.addEventListener('click', () => {
-  ensureAudioContext();
-  if (audio.paused) { audio.play(); } else { audio.pause(); }
-});
-audio.addEventListener('play', () => { playBtn.textContent = '⏸'; });
-audio.addEventListener('pause', () => { playBtn.textContent = '▶'; });
-
-function fmt(s) {
-  const m = Math.floor(s / 60);
-  const sec = Math.floor(s % 60);
-  return `${m}:${sec.toString().padStart(2, '0')}`;
-}
-
-audio.addEventListener('loadedmetadata', () => {
-  seekBar.max = audio.duration;
-  timeDisplay.textContent = `0:00 / ${fmt(audio.duration)}`;
-});
-
-// Seek bar
-let seeking = false;
-seekBar.addEventListener('input', () => {
-  seeking = true;
-  timeDisplay.textContent = `${fmt(seekBar.value)} / ${fmt(audio.duration || 0)}`;
-});
-seekBar.addEventListener('change', () => {
-  audio.currentTime = parseFloat(seekBar.value);
-  // keep seeking=true until the audio engine confirms the seek
-});
-audio.addEventListener('seeked', () => {
-  seeking = false;
-});
+const REDUCED_VOLUME = 0.1;
 
 function seekTo(t) {
-  // Don't call ensureAudioContext() here — createMediaElementSource() on first
-  // call can reset currentTime in some browsers. Resume only if already created.
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   audio.currentTime = t;
-  seekBar.value = t;
-  timeDisplay.textContent = `${fmt(t)} / ${fmt(audio.duration || 0)}`;
   audio.play().catch(() => {});
 }
 
-// Highlight active line + update seek bar + per-character gain
+// Highlight active line + per-character volume via audio.volume
 audio.addEventListener('timeupdate', () => {
   const t = audio.currentTime;
-  if (!seeking) {
-    seekBar.value = t;
-    timeDisplay.textContent = `${fmt(t)} / ${fmt(audio.duration || 0)}`;
-  }
   let currentChar = null;
   lines.forEach(el => {
     const start = parseFloat(el.dataset.start);
@@ -321,14 +215,13 @@ audio.addEventListener('timeupdate', () => {
       el.classList.remove('active');
     }
   });
-  if (gainNode) {
-    gainNode.gain.value = currentChar && reducedChars.has(currentChar) ? REDUCED_GAIN : 1.0;
-  }
+  audio.volume = currentChar && reducedChars.has(currentChar) ? REDUCED_VOLUME : 1.0;
 });
 
 function isInViewport(el) {
   const r = el.getBoundingClientRect();
-  return r.top >= 80 && r.bottom <= window.innerHeight;
+  const barHeight = document.getElementById('player-bar').offsetHeight;
+  return r.top >= barHeight && r.bottom <= window.innerHeight;
 }
 
 // Speed control

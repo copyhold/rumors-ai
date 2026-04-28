@@ -20,13 +20,17 @@
     padding: 12px 20px;
     border-bottom: 1px solid #0f3460;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 10px;
+    > div {
+      flex: 1 0 100%;
+    }
   }
   audio {
-    width: 100%;
     height: 36px;
     direction: ltr;
+    max-width: 80vw;
   }
   #search-row {
     display: flex;
@@ -158,12 +162,21 @@
       min-width: unset;
     }
   }
+
+  #player-bar {
+    .collapsecontrols:checked {
+      ~ :is(#search-row, #legend, #reduce-row, #speed-row) {
+        display: none;
+      }
+    }
+  }
 </style>
 </head>
 <body>
 
 <div id="player-bar">
   <audio id="audio" src="https://media.githubusercontent.com/media/copyhold/rumors-ai/refs/heads/main/distr/play_audio.mp3" controls></audio>
+  <input type=checkbox class=collapsecontrols />
   <div id="search-row">
     <input id="search-box" type="text" placeholder="חיפוש בטקסט..." autocomplete="off">
     <span id="search-info"></span>
@@ -196,6 +209,7 @@ let searchIdx = 0;
 
 const reducedChars = new Set();
 const REDUCED_VOLUME = 0.1;
+const REDUCED_SPEED = 0.8;
 
 function seekTo(t) {
   audio.currentTime = t;
@@ -203,7 +217,7 @@ function seekTo(t) {
 }
 
 // Highlight active line + per-character volume via audio.volume
-audio.addEventListener('timeupdate', () => {
+audio.addEventListener('timeupdate', (e) => {
   const t = audio.currentTime;
   let currentChar = null;
   lines.forEach(el => {
@@ -219,7 +233,9 @@ audio.addEventListener('timeupdate', () => {
       el.classList.remove('active');
     }
   });
-  audio.volume = currentChar && reducedChars.has(currentChar) ? REDUCED_VOLUME : 1.0;
+  const isCharacterReduced = currentChar && reducedChars.has(currentChar)
+  audio.volume =  isCharacterReduced ? REDUCED_VOLUME : 1.0;
+  audio.playbackRate =  isCharacterReduced ? REDUCED_SPEED : 1.0;
 });
 
 function isInViewport(el) {

@@ -23,6 +23,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 10px;
+    align-items: center;
     > div {
       flex: 1 0 100%;
     }
@@ -164,9 +165,33 @@
   }
 
   #player-bar {
+    .collapsecontrols {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      appearance: none;
+      position: relative;
+      background: gray;
+      &::before {
+        content: '';
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 6px 5px 0 5px;
+        border-color: #fff transparent transparent;
+        position: absolute;
+        top: 8px;
+        left: 5px;
+      }
+    }
     .collapsecontrols:checked {
       ~ :is(#search-row, #legend, #reduce-row, #speed-row) {
         display: none;
+      }
+      &::before {
+        border-width: 0 5px 6px 5px;
+        border-color: transparent transparent #fff ;
       }
     }
   }
